@@ -1,30 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PixelPerfect AI - Generate Stunning AI Images</title>
-  <meta name="description" content="Turn words into art using AI. PixelPerfect AI lets you create stunning images from any prompt.">
+  <title>PixelPerfect AI - AI Image Generator</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <div class="max-w-3xl mx-auto p-6">
-    <h1 class="text-4xl font-extrabold text-center text-indigo-600 mb-2">PixelPerfect AI</h1>
-    <p class="text-center text-gray-700 mb-8">Turn words into stunning images using the power of artificial intelligence.</p>
+<body class="min-h-screen flex flex-col items-center p-6 transition-colors duration-300">
 
-    <form id="form" class="bg-white p-6 rounded shadow">
-      <label for="prompt" class="block mb-2 font-semibold text-gray-700">Describe your image:</label>
-      <input type="text" id="prompt" placeholder="e.g., a futuristic city in the clouds"
-        class="w-full p-3 border border-gray-300 rounded mb-4" required />
-
-      <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded hover:bg-indigo-700 transition">
-        Generate Image
+  <div class="w-full max-w-2xl">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">PixelPerfect AI</h1>
+      <button id="darkModeToggle" class="text-sm px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+        Toggle Dark Mode
       </button>
+    </div>
+
+    <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+      Turn your words into stunning images using the power of AI. You have
+      <span id="creditCount" class="font-semibold">3</span> free credits.
+    </p>
+
+    <form id="form" class="bg-white dark:bg-gray-800 p-4 rounded shadow">
+      <label for="prompt" class="block mb-2 font-medium">Enter your prompt:</label>
+      <input type="text" id="prompt" class="w-full p-3 mb-4 rounded border border-gray-300 dark:border-gray-600" placeholder="e.g. a futuristic city at sunset" required />
+      <div class="flex gap-2 mb-4">
+        <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-800 rounded">a robot holding a flower</button>
+        <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-800 rounded">a spaceship landing on Mars</button>
+        <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-800 rounded">a wizard cat casting spells</button>
+      </div>
+      <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded hover:bg-indigo-700 transition">Generate Image</button>
     </form>
 
-    <div id="loading" class="text-center mt-4 hidden text-gray-600">Generating image, please wait...</div>
+    <div id="loading" class="mt-4 text-center hidden">Generating image, please wait...</div>
+    <div id="result" class="mt-6 flex flex-col items-center gap-4"></div>
 
-    <div id="result" class="mt-6 flex justify-center items-center flex-col gap-4"></div>
+    <div id="upgradeNotice" class="hidden mt-6 text-center bg-yellow-100 dark:bg-yellow-800 p-4 rounded">
+      <p class="mb-2">You've used all 3 free images.</p>
+      <button class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+        Upgrade for More Credits
+      </button>
+    </div>
   </div>
 
   <script>
@@ -32,9 +48,34 @@
     const promptInput = document.getElementById('prompt');
     const resultDiv = document.getElementById('result');
     const loadingDiv = document.getElementById('loading');
+    const upgradeNotice = document.getElementById('upgradeNotice');
+    const creditCountSpan = document.getElementById('creditCount');
+    const darkToggle = document.getElementById('darkModeToggle');
+    const sampleBtns = document.querySelectorAll('.sample-btn');
+
+    // Load or initialize credits
+    let credits = parseInt(localStorage.getItem('pixelperfect_credits')) || 3;
+    creditCountSpan.textContent = credits;
+
+    // Dark mode toggle
+    darkToggle.onclick = () => {
+      document.documentElement.classList.toggle('dark');
+    };
+
+    // Fill prompt from sample
+    sampleBtns.forEach(btn => {
+      btn.onclick = () => {
+        promptInput.value = btn.textContent;
+      };
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (credits <= 0) {
+        upgradeNotice.classList.remove('hidden');
+        return;
+      }
+
       const prompt = promptInput.value.trim();
       if (!prompt) return;
 
@@ -52,18 +93,25 @@
         loadingDiv.classList.add('hidden');
 
         if (data.image_url) {
+          credits -= 1;
+          localStorage.setItem('pixelperfect_credits', credits);
+          creditCountSpan.textContent = credits;
+
           resultDiv.innerHTML = `
-            <img src="${data.image_url}" alt="AI-generated image" class="rounded shadow w-full max-w-md" />
-            <a href="${data.image_url}" target="_blank" class="text-indigo-600 underline">View Full Image</a>
+            <img src="${data.image_url}" alt="AI Result" class="rounded shadow max-w-full max-h-[400px]" />
+            <a href="${data.image_url}" download class="text-indigo-600 underline">Download Image</a>
           `;
         } else {
-          console.error("Error:", data);
-          resultDiv.innerHTML = `<p class="text-red-600">Error: ${data.error || 'Try again'}</p>`;
+          resultDiv.innerHTML = `<p class="text-red-500">Error: ${data.error || 'Try again'}</p>`;
         }
+
+        if (credits <= 0) {
+          upgradeNotice.classList.remove('hidden');
+        }
+
       } catch (err) {
-        console.error("Fetch failed:", err);
         loadingDiv.classList.add('hidden');
-        resultDiv.innerHTML = `<p class="text-red-600">Something went wrong. ${err.message}</p>`;
+        resultDiv.innerHTML = `<p class="text-red-500">Something went wrong: ${err.message}</p>`;
       }
     });
   </script>
