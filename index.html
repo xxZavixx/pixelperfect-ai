@@ -23,7 +23,13 @@
 
     <form id="form" class="bg-white dark:bg-gray-800 p-4 rounded shadow">
       <label for="prompt" class="block mb-2 font-medium">Enter your prompt:</label>
-      <input type="text" id="prompt" class="w-full p-3 mb-4 rounded border border-gray-300 dark:border-gray-600" placeholder="e.g. a futuristic city at sunset" required />
+      <input
+        type="text"
+        id="prompt"
+        class="w-full p-3 mb-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+        placeholder="e.g. a futuristic city at sunset"
+        required
+      />
       <div class="flex gap-2 mb-4">
         <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-800 rounded">a robot holding a flower</button>
         <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-800 rounded">a spaceship landing on Mars</button>
@@ -53,14 +59,20 @@
     const darkToggle = document.getElementById('darkModeToggle');
     const sampleBtns = document.querySelectorAll('.sample-btn');
 
+    // Dark mode - apply saved preference on load
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    darkToggle.onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    };
+
     // Load or initialize credits
     let credits = parseInt(localStorage.getItem('pixelperfect_credits')) || 3;
     creditCountSpan.textContent = credits;
-
-    // Dark mode toggle
-    darkToggle.onclick = () => {
-      document.documentElement.classList.toggle('dark');
-    };
 
     // Fill prompt from sample
     sampleBtns.forEach(btn => {
