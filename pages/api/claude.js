@@ -13,22 +13,20 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${process.env.CLAUDE_API_TOKEN}`, // Use CLAUDE_API_TOKEN here
+        'Authorization': `Token ${process.env.REPLICATE_CLAUDE_TOKEN}`, // <-- Claude's token
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        version: "e7f48c998bcdd0f0bfa07bf0f9ce363260bce0729f1f818cd91c8c51df3c3b79",
+        version: "e7f48c998bcdd0f0bfa07bf0f9ce363260bce0729f1f818cd91c8c51df3c3b79", // Claude 3.7 Sonnet
         input: {
           prompt: `Rewrite this idea to make it more descriptive and vivid for an AI image generator: "${idea}"`,
           system_prompt: "",
-          max_tokens: 500,
-          max_image_resolution: 0.5
+          max_tokens: 500
         }
       })
     });
 
     const prediction = await response.json();
-    console.log("Claude prediction start:", prediction);
 
     if (!prediction?.urls?.get) {
       return res.status(500).json({ error: 'Failed to start enhancement' });
@@ -38,12 +36,11 @@ export default async function handler(req, res) {
     while (!result) {
       const poll = await fetch(prediction.urls.get, {
         headers: {
-          'Authorization': `Token ${process.env.CLAUDE_API_TOKEN}`
+          'Authorization': `Token ${process.env.REPLICATE_CLAUDE_TOKEN}`
         }
       });
 
       const data = await poll.json();
-      console.log("Claude polling data:", data);
 
       if (data.status === 'succeeded') {
         result = data.output;
@@ -57,7 +54,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ enhanced: result });
   } catch (err) {
-    console.error("Claude handler error:", err);
+    console.error("Claude API error:", err);
     res.status(500).json({ error: 'Something went wrong' });
   }
 }
