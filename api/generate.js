@@ -18,20 +18,19 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         version: "a9758cbf44a3794dd1ec8fdf6cd3a4ac066693b8ad0e3c7ba7c3b49a2c3d0e74", // Stable Diffusion v1.5
-        input: {
-          prompt: prompt
-        }
+        input: { prompt }
       })
     });
 
     const prediction = await replicateResponse.json();
 
     if (!prediction?.urls?.get) {
+      console.error("Prediction start failed:", prediction);
       return res.status(500).json({ error: 'Failed to start image generation' });
     }
 
-    // Poll the status until the image is generated
     let imageUrl = null;
+
     while (!imageUrl) {
       const pollRes = await fetch(prediction.urls.get, {
         headers: {
@@ -44,16 +43,17 @@ export default async function handler(req, res) {
       if (pollData.status === 'succeeded') {
         imageUrl = pollData.output[0];
       } else if (pollData.status === 'failed') {
+        console.error("Prediction failed:", pollData);
         return res.status(500).json({ error: 'Image generation failed' });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2s before next poll
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before polling again
     }
 
     res.status(200).json({ image_url: imageUrl });
 
   } catch (error) {
-    console.error(error);
+    console.error("Catch error:", error);
     res.status(500).json({ error: 'Something went wrong' });
   }
 }
