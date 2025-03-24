@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST requests allowed' });
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+        'Authorization': `Token ${process.env.REPLICATE_CLAUDE_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
     while (!result) {
       const poll = await fetch(prediction.urls.get, {
         headers: {
-          'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`
+          'Authorization': `Token ${process.env.REPLICATE_CLAUDE_TOKEN}`
         }
       });
 
