@@ -24,8 +24,10 @@ export default async function handler(req, res) {
 
     const prediction = await replicateResponse.json();
 
+    // Log response from Replicate to check for issues
+    console.log("Replicate raw response:", prediction);
+
     if (!prediction?.urls?.get) {
-      console.error("Prediction start failed:", prediction);
       return res.status(500).json({ error: 'Failed to start image generation' });
     }
 
@@ -54,6 +56,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("Catch error:", error);
-    res.status(500).json({ error: 'Something went wrong' });
+    res.status(500).json({ error: 'Something went wrong on the server' });
   }
 }
