@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- minor update to trigger redeploy -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PixelPerfect AI - Generate Stunning AI Images</title>
@@ -58,12 +57,13 @@
             <a href="${data.image_url}" target="_blank" class="text-indigo-600 underline">View Full Image</a>
           `;
         } else {
-          resultDiv.innerHTML = `<p class="text-red-600">Something went wrong. Try again.</p>`;
+          console.error("Error:", data);
+          resultDiv.innerHTML = `<p class="text-red-600">Error: ${data.error || 'Try again'}</p>`;
         }
       } catch (err) {
-        console.error(err);
+        console.error("Fetch failed:", err);
         loadingDiv.classList.add('hidden');
-        resultDiv.innerHTML = `<p class="text-red-600">Error generating image. Try again.</p>`;
+        resultDiv.innerHTML = `<p class="text-red-600">Something went wrong. ${err.message}</p>`;
       }
     });
   </script>
