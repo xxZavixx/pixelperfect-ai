@@ -20,8 +20,9 @@ export default async function handler(req, res) {
         version: "e7f48c998bcdd0f0bfa07bf0f9ce363260bce0729f1f818cd91c8c51df3c3b79", // Claude 3.7 Sonnet
         input: {
           prompt: `Rewrite this idea to make it more descriptive and vivid for an AI image generator: "${idea}"`,
-          max_tokens: 120,
-          temperature: 0.7
+          system_prompt: "",
+          max_tokens: 500,
+          max_image_resolution: 0.5
         }
       })
     });
