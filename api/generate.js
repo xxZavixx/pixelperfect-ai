@@ -17,14 +17,13 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        version: "a9758cbf44a3794dd1ec8fdf6cd3a4ac066693b8ad0e3c7ba7c3b49a2c3d0e74", // Stable Diffusion v1.5
+        version: "ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
         input: { prompt }
       })
     });
 
     const prediction = await replicateResponse.json();
 
-    // Log response from Replicate to check for issues
     console.log("Replicate raw response:", prediction);
 
     if (!prediction?.urls?.get) {
