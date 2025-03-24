@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${process.env.REPLICATE_CLAUDE_TOKEN}`, // <-- Claude's token
+        'Authorization': `Token ${process.env.CLAUDE_API_TOKEN}`,  // <-- USE A SEPARATE TOKEN
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -29,6 +29,7 @@ export default async function handler(req, res) {
     const prediction = await response.json();
 
     if (!prediction?.urls?.get) {
+      console.error("Claude init failed:", prediction);
       return res.status(500).json({ error: 'Failed to start enhancement' });
     }
 
@@ -36,7 +37,7 @@ export default async function handler(req, res) {
     while (!result) {
       const poll = await fetch(prediction.urls.get, {
         headers: {
-          'Authorization': `Token ${process.env.REPLICATE_CLAUDE_TOKEN}`
+          'Authorization': `Token ${process.env.CLAUDE_API_TOKEN}`
         }
       });
 
@@ -46,6 +47,7 @@ export default async function handler(req, res) {
         result = data.output;
         break;
       } else if (data.status === 'failed') {
+        console.error("Claude failed:", data);
         return res.status(500).json({ error: 'Enhancement failed' });
       }
 
@@ -53,8 +55,9 @@ export default async function handler(req, res) {
     }
 
     res.status(200).json({ enhanced: result });
+
   } catch (err) {
-    console.error("Claude API error:", err);
-    res.status(500).json({ error: 'Something went wrong' });
+    console.error("Claude error:", err);
+    res.status(500).json({ error: 'Something went wrong with Claude' });
   }
 }
