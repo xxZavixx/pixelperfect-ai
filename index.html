@@ -19,23 +19,8 @@
   <!-- Hero -->
   <div class="w-full max-w-4xl text-center mb-10">
     <p class="text-lg text-gray-600 dark:text-gray-300">
-      A suite of creative AI tools for writing smarter prompts & generating stunning visuals.
+      A suite of creative AI tools for generating stunning visuals.
     </p>
-  </div>
-
-  <!-- Prompt Enhancer (Claude) -->
-  <div class="w-full max-w-4xl bg-white dark:bg-gray-800 p-6 rounded shadow mb-10">
-    <h2 class="text-xl font-semibold mb-3">Claude Prompt Enhancer</h2>
-    <form id="enhanceForm">
-      <label for="rawPrompt" class="block mb-2 font-medium">Enter your idea:</label>
-      <input type="text" id="rawPrompt" class="w-full p-3 mb-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="e.g. futuristic robot in a city" required />
-      <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Enhance Prompt</button>
-    </form>
-    <div id="enhancedResult" class="mt-4 hidden">
-      <label class="block mb-1 font-medium">Enhanced Prompt:</label>
-      <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded mb-2" id="enhancedText"></div>
-      <button id="useEnhanced" class="text-sm text-indigo-600 underline">Use this for image generation</button>
-    </div>
   </div>
 
   <!-- Image Generator -->
@@ -45,7 +30,7 @@
       You have <span id="creditCount" class="font-semibold">3</span> free credits remaining.
     </p>
     <form id="form">
-      <input type="text" id="prompt" class="w-full p-3 mb-3 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Enter a prompt or use the enhancer above" required />
+      <input type="text" id="prompt" class="w-full p-3 mb-3 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" placeholder="Enter a prompt" required />
       <div class="flex gap-2 mb-3">
         <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-700 rounded">sunset on a mountain</button>
         <button type="button" class="sample-btn px-2 py-1 bg-indigo-100 dark:bg-indigo-700 rounded">cyberpunk cityscape</button>
@@ -73,12 +58,6 @@
     const sampleBtns = document.querySelectorAll('.sample-btn');
     const darkToggle = document.getElementById('darkModeToggle');
 
-    const enhanceForm = document.getElementById('enhanceForm');
-    const rawPromptInput = document.getElementById('rawPrompt');
-    const enhancedResultDiv = document.getElementById('enhancedResult');
-    const enhancedTextEl = document.getElementById('enhancedText');
-    const useEnhancedBtn = document.getElementById('useEnhanced');
-
     // Dark mode persistence
     if (localStorage.getItem('theme') === 'dark') {
       document.documentElement.classList.add('dark');
@@ -98,38 +77,6 @@
         promptInput.value = btn.textContent;
       };
     });
-
-    // Claude Enhance Prompt
-    enhanceForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const idea = rawPromptInput.value.trim();
-      if (!idea) return;
-
-      enhancedResultDiv.classList.add('hidden');
-      enhancedTextEl.textContent = "Enhancing with Claude...";
-
-      try {
-        const res = await fetch('/api/claude', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idea })
-        });
-        const data = await res.json();
-        if (data?.enhanced) {
-          enhancedTextEl.textContent = data.enhanced;
-          enhancedResultDiv.classList.remove('hidden');
-        } else {
-          enhancedTextEl.textContent = "Something went wrong. Try again.";
-        }
-      } catch (err) {
-        enhancedTextEl.textContent = "Error connecting to Claude.";
-      }
-    });
-
-    useEnhancedBtn.onclick = () => {
-      promptInput.value = enhancedTextEl.textContent;
-      window.scrollTo({ top: promptInput.offsetTop - 100, behavior: 'smooth' });
-    };
 
     // Image Generation
     form.addEventListener('submit', async (e) => {
